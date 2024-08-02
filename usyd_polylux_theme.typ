@@ -167,12 +167,19 @@
   authors: (),
   date: none,
   logo: none,
+  title_image: none,
 ) = {
   let authors = if type(authors) == "array" {
     authors
   } else {
     (authors,)
   }
+
+    let bck_img = if title_image != none {
+        title_image
+    } else {
+        "./figures/usyd.jpg"
+    }
 
   let content = locate(loc => {
     grid(
@@ -214,8 +221,7 @@
           },
         ),
       ),
-      // align(center, image("./figures/acfr-hero-image.jpg", height: 100%)),
-      align(center, image("./figures/usyd.jpg", height: 100%)),
+      align(center, image(bck_img, height:100%)),
     )
   })
   logic.polylux-slide(content)
@@ -228,7 +234,7 @@
   new-section: none,
   body,
 ) = {
-  let body = pad(x: 60pt, y: 60pt, body)
+  let body = pad(y:10pt, x: 60pt, body)
 
   let header-text = {
 
@@ -310,7 +316,7 @@
 
   let content = locate(loc => {
     grid(inset: (x: 55pt, y: 11pt),
-      rows: (auto, auto),
+      rows: (10%, auto),
       align(
         horizon,
         strong(
