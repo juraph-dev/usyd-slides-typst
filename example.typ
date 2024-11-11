@@ -14,6 +14,7 @@
   title: "University of Sydney Typst Presentation theme",
   subtitle: "Powered by Polylux",
   // date: datetime.today().display() // Use this to display current date
+  title_image: "./figures/acfr-hero-image.jpg",
   date: "24th July 2024"
 )
 
