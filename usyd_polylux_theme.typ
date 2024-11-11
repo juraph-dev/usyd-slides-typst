@@ -32,8 +32,7 @@
   padding: 0pt,
   min-window-size: 3,
   max-length: 90pt,
-) = locate(loc => {
-  let sections = utils.sections-state.final(loc)
+) = locate(loc => { let sections = utils.sections-state.final(loc)
   let current-section = utils.sections-state.get()
   if current-section.len() == 0 {
     return
@@ -53,7 +52,7 @@
     let end = int(calc.min(sections.len(), start + window-size))
     start = calc.floor(calc.max(0, end - window-size))
 
-    total-length = sections.slice(start, window-size).map(s => measure(s.body).width).sum()
+    total-length = sections.slice(start, end).map(s => measure(s.body).width).sum()
     if total-length > max-length {
       window-size -= 1
     }
@@ -147,7 +146,8 @@
     header: none,
     footer: none,
   )
-  show footnote.entry: set text(size: .6em)
+
+  show footnote.entry: set text(size: .9em, fill: s-charcoal)
 
   uni-progress-bar.update(progress-bar)
   uni-short-title.update(short-title)
@@ -202,7 +202,7 @@
               columns: (1fr,) * calc.min(authors.len(), 3),
               column-gutter: 1em,
               row-gutter: 1em,
-              ..authors.map(author => strong(text(fill: s-black, author)))
+              ..authors.map(author => strong(text(fill: s-charcoal, author)))
             )
             v(45pt)
             if date != none {
@@ -228,7 +228,7 @@
   new-section: none,
   body,
 ) = {
-  let body = pad(x: 60pt, y: 60pt, body)
+  let body = pad(y:10pt, x: 60pt, body)
 
   let header-text = {
 
@@ -310,7 +310,7 @@
 
   let content = locate(loc => {
     grid(inset: (x: 55pt, y: 11pt),
-      rows: (auto, auto),
+      rows: (10%, auto),
       align(
         horizon,
         strong(
