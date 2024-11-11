@@ -34,7 +34,7 @@
   #usyd-info-block(title: "Info", "info block")
     #usyd-example-block(title: "Example", "example block")
     #usyd-alert-block(title: "Alert", "alert block")
-    Blocks are schemed to usyd themes.
+    Blocks are schemed to usyd themes. #footnote[Footnotes work too!]
 ]
 
 #new-section-slide("Break slide to introduce new section")
