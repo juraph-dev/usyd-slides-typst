@@ -3,7 +3,8 @@
 #show: usyd-theme.with(
   short-author: "Juraph",
   short-title: "Demo of Typst capabilities",
-  short-date: "24th Jul, 2024"
+  // short-date: "24th Jul, 2024"
+  short-date: datetime.today().display(),
 )
 #set text(font: "Arial", fallback: false)
 
@@ -13,9 +14,9 @@
   authors: [Juraph, author2, author3, author4],
   title: "University of Sydney Typst Presentation theme",
   subtitle: "Powered by Polylux",
-  // date: datetime.today().display() // Use this to display current date
+  date: datetime.today().display(), // Use this to display current date
   title_image: "./figures/acfr-hero-image.jpg",
-  date: "24th July 2024"
+  // date: "24th July 2024" Custom date
 )
 
 #usyd-pres-outline()

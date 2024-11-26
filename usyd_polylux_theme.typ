@@ -297,7 +297,7 @@
               inset: (y: 25%, x: 5%),
               width: 100%,
               height: 100%,
-              text(fill: s-charcoal, uni-short-date.display()),
+              text(fill: s-charcoal, logic.logical-slide.display()),
             ),
           ),
         )
