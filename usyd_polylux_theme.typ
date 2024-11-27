@@ -278,7 +278,7 @@
             inset: (y: 25%),
             width: 100%,
             height: 60%,
-            uni-short-author.display(),
+            text(fill: s-white, uni-short-author.display()),
           ),
           align(
             left,
