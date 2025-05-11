@@ -1,4 +1,5 @@
-#import "@preview/polylux:0.3.1": *
+#import "@preview/polylux:0.4.0"
+
 
 // University of Sydney Typst Polylux theme
 //
@@ -24,66 +25,64 @@
 #let uni-short-date = state("uni-short-date", none)
 #let uni-progress-bar = state("uni-progress-bar", true)
 
-
 #set page(paper: "presentation-16-9")
 
+// Fancy header showing the current section
 #let usyd-outline(
   enum-args: (:),
   padding: 0pt,
   min-window-size: 3,
   max-length: 90pt,
-) = locate(loc => { let sections = utils.sections-state.final(loc)
-  let current-section = utils.sections-state.get()
-  if current-section.len() == 0 {
-    return
-  }
-  let current-index = sections.position(s => s == current-section.at(-1))
+) = {
+  polylux.toolbox.all-sections((sections, current) => {
+    if sections.len() == 0 {
+      return
+    }
 
-  // Calculate the window size based on section lengths. Kinda overkill
-  // for a glorified powerpoint
-  let window-size = sections.len()
-  let total-length = sections
-    .slice(0, window-size)
-    .map(s => measure(s.body).width)
-    .sum()
+    let current-index = sections.position(s => s == current)
 
-  while window-size > min-window-size and total-length > max-length {
+    let window-size = sections.len()
+    let total-length = sections
+      .slice(0, window-size)
+      .map(s => measure(s.body).width)
+      .sum()
+
+    while window-size > min-window-size and total-length > max-length {
+      let start = calc.max(0, current-index - window-size / 2 + 1)
+      let end = int(calc.min(sections.len(), start + window-size))
+      start = calc.floor(calc.max(0, end - window-size))
+      total-length = sections.slice(start, end).map(s => measure(s.body).width).sum()
+      if total-length > max-length {
+        window-size -= 1
+      }
+    }
+
     let start = calc.max(0, current-index - window-size / 2 + 1)
     let end = int(calc.min(sections.len(), start + window-size))
     start = calc.floor(calc.max(0, end - window-size))
+    let visible-sections = sections.slice(start, end)
 
-    total-length = sections.slice(start, end).map(s => measure(s.body).width).sum()
-    if total-length > max-length {
-      window-size -= 1
-    }
-  }
-  let start = calc.max(0, current-index - window-size / 2 + 1)
-  let end = int(calc.min(sections.len(), start + window-size))
-  start = calc.floor(calc.max(0, end - window-size))
-
-  let visible-sections = sections.slice(start, end)
-
-  pad(
-    padding,
-    box(
-      width: 100%,
-      align(center + horizon)[
-        #grid(
-          columns: visible-sections.len(),
-          gutter: 1fr,
-          ..visible-sections.enumerate().map(((i, section)) => {
-            if section == current-section.at(-1) {
-              text(fill: s-white, link(section.loc, section.body))
-            } else {
-              text(fill: s-half-white, link(section.loc, section.body))
-            }
-          })
-        )
-      ],
-    ),
-  )
-})
-)
+    pad(
+      padding,
+      box(
+        width: 100%,
+        align(center + horizon)[
+          #grid(
+            columns: visible-sections.len(),
+            gutter: 1fr,
+            ..visible-sections.enumerate().map(((i, vis-section)) => {
+                if current.fields().at("body") == vis-section.fields().at("body") {
+                  text(fill: s-white, current.fields().at("body"))
+              } else {
+                  text(fill: s-half-white, vis-section.fields().at("body"))
+              }
+            })
+          )
+        ],
+      ),
+    )
+  })
+}
 
 #let usyd-rounded-block(radius: 3mm, body) = {
   block(
@@ -155,7 +154,7 @@
   if short-date != none {
     uni-short-date.update(short-date)
   } else {
-    uni-short-date.update(datetime.today().display())
+    uni-short-date.update(get(datetime.today()))
   }
 
   body
@@ -169,7 +168,7 @@
   logo: none,
   title_image: none,
 ) = {
-  let authors = if type(authors) == "array" {
+  let authors = if type(authors) == array {
     authors
   } else {
     (authors,)
@@ -181,52 +180,51 @@
         "./figures/usyd.jpg"
     }
 
-  let content = locate(loc => {
-    grid(
-      columns: (50%, 50%),
-      block(
-        fill: s-ochre,
-        width: 100%,
-        height: 100%,
-        inset: (x: 3em),
-        align(
-          horizon,
-          {
-            block(
-              breakable: false,
-              {
-                v(55pt)
-                text(size: 28pt, fill: s-white, strong(title))
-                if subtitle != none {
-                  v(4pt)
-                  text(size: 25pt, fill: s-black, subtitle)
-                }
-              },
-            )
-            v(44pt)
-            set text(size: 15pt)
-            grid(
-              columns: (1fr,) * calc.min(authors.len(), 3),
-              column-gutter: 1em,
-              row-gutter: 1em,
-              ..authors.map(author => strong(text(fill: s-charcoal, author)))
-            )
-            v(45pt)
-            if date != none {
-              parbreak()
-              text(size: 14pt, date, fill: s-black)
-            }
-            v(60pt)
-            image("./figures/usyd-long.png", width: 35%)
-          },
-        ),
+let content = {
+  grid(
+    columns: (50%, 50%),
+    block(
+      fill: s-ochre,
+      width: 100%,
+      height: 100%,
+      inset: (x: 3em),
+      align(
+        horizon,
+        {
+          block(
+            breakable: false,
+            {
+              v(55pt)
+              text(size: 28pt, fill: s-white, strong(title))
+              if subtitle != none {
+                v(4pt)
+                text(size: 25pt, fill: s-black, subtitle)
+              }
+            },
+          )
+          v(44pt)
+          set text(size: 15pt)
+          grid(
+            columns: (1fr,) * calc.min(authors.len(), 3),
+            column-gutter: 1em,
+            row-gutter: 1em,
+            ..authors.map(author => strong(text(fill: s-charcoal, author)))
+          )
+          v(45pt)
+          if date != none {
+            parbreak()
+            text(size: 14pt, date, fill: s-black)
+          }
+          v(60pt)
+          image("./figures/usyd-long.png", width: 35%)
+        },
       ),
-      align(center, image(bck_img, height:100%)),
-    )
-  })
-  logic.polylux-slide(content)
+    ),
+    align(right, image(bck_img, width:100%)),
+  )
 }
-
+    polylux.slide(content)
+}
 
 #let slide(
   title: none,
@@ -248,20 +246,20 @@
       align(center + horizon, text(fill: s-black, it, size: 15pt)),
     )
     if new-section != none {
-      utils.register-section(new-section)
+        polylux.toolbox.register-section(new-section)
     }
-    locate(loc => {
-      grid(
-        columns: (30%, 70%),
-        inset: (y: 4.5pt),
-        align(center + horizon, image("./figures/usyd-long-white.png", height: 100%)),
-        cell(usyd-outline()),
-      )
-    })
-  }
+place(
+  grid(
+    columns: (30%, 70%),
+    inset: (y: 4.5pt),
+    align(center + horizon, image("./figures/usyd-long-white.png", height: 100%)),
+      // cell(text("ad")),
+    cell(usyd-outline()),
+  ))}
+
 
   let header = {
-    grid(rows: (auto), header-text)
+      header-text
   }
 
   let footer = {
@@ -270,7 +268,6 @@
     if footer != none {
       footer
     } else {
-      locate(loc => {
         grid(
           columns: (30%, 35%, 35%),
           rect(
@@ -278,7 +275,7 @@
             inset: (y: 25%),
             width: 100%,
             height: 60%,
-            text(fill: s-white, uni-short-author.display()),
+              text(fill: s-white, context {uni-short-author.get()}),
           ),
           align(
             left,
@@ -287,7 +284,7 @@
               inset: (y: 25%, x: 5%),
               width: 100%,
               height: 100%,
-              text(fill: s-charcoal, uni-short-title.display()),
+                text(fill: s-charcoal, context {uni-short-title.get()}),
             ),
           ),
           align(
@@ -297,11 +294,10 @@
               inset: (y: 25%, x: 5%),
               width: 100%,
               height: 100%,
-              text(fill: s-charcoal, logic.logical-slide.display()),
+                text(fill: s-charcoal, context {polylux.toolbox.slide-number}),
             ),
           ),
         )
-      })
     }
   }
 
@@ -314,22 +310,24 @@
     header-ascent: 6pt,
   )
 
-  let content = locate(loc => {
-    grid(inset: (x: 55pt, y: 11pt),
-      rows: (10%, auto),
-      align(
-        horizon,
-        strong(
-          text(
-            size: 28pt,
-            title,
-            fill: s-ochre,
-          ),
+let content = {
+  grid(inset: (x: 55pt, y: 11pt),
+    rows: (10%, auto),
+    align(
+      horizon,
+      strong(
+        text(
+          size: 28pt,
+          title,
+          fill: s-ochre,
         ),
       ),
-      align(horizon, text(size: 15pt, fill: s-charcoal, body)))
-  })
-  logic.polylux-slide(content)
+    ),
+    align(horizon, text(size: 15pt, fill: s-charcoal, body)))
+}
+
+    polylux.slide(content)
+
 }
 
 #let focus-slide(background-color: none, background-img: none, body) = {
